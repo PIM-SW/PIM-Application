@@ -1,0 +1,227 @@
+/**********************************************/
+/*  COMMAND LINE FOR ALL APPLICATIONS         */
+/*  INCLUDES SERIAL & PARALLEL COMMAND LINES */
+/**********************************************/
+
+/*************************************************/
+/* PLEASE DO NOT DISTRIBUTE                      */
+/* Copyright - Berkin Ozisikyilmaz,              */
+/* Northwestern University                       */
+/* Email: nu-minebench@ece.northwestern.edu      */
+/*************************************************/
+
+
+NOTE: For all parallel applications, the supplied 
+command lines use 4 processors for execution. 
+
+The notation used is ApplicationName:Serial for 
+the command line for the serial version of the
+application and ApplicationName:Parallel for its 
+parallel equivalent.
+
+
+---------------------------
+HOP:Parallel
+---------------------------
+$DMHOME/src/HOP/para_hop 61440 $DMHOME/datasets/HOP/particles_0_64 64 16 -1 4
+
+Other dataset combinations:
+* 491520, _0_128
+* 3932160, _0_256
+
+
+
+---------------------------
+APRIORI:Parallel
+---------------------------
+$DMHOME/src/APR/no_output_apriori -i $DMHOME/datasets/APR/data.ntrans_1000.tlen_10.nitems_1.npats_2000.patlen_6 -f $DMHOME/datasets/APR/offset_file_1000_10_1_P4.txt -s 0.0075 -n 4
+
+There is a utility file, offsets.c, that can generate offsets for different
+number of threads. For example, use the following commands to generate a list
+of offsets for 4 threads.
+
+make offsets
+offsets datafile 4
+
+(example datafile can be NU-MineBench/DataSet/2.0.data1/datasets/APR/data.ntrans_8000.tlen_20.nitems_1.npats_2000.patlen_6)
+
+
+---------------------------
+BAYESIAN:Serial
+---------------------------
+$DMHOME/src/Bayesian/bayes/src/bci -d $DMHOME/datasets/Bayesian/F26-A64-D250K_bayes.dom $DMHOME/datasets/Bayesian/F26-A64-D250K_bayes.tab $DMHOME/datasets/Bayesian/F26-A64-D250K_bayes.nbc
+
+
+
+---------------------------
+ScalParC: OpenMP
+---------------------------
+ScalParC/scalparc $DMHOME/datasets/ScalParC/para_F26-A32-D250K/F26-A32-D250K.tab 250000 32 2 4
+
+
+
+---------------------------
+KMeans:Parallel
+---------------------------
+$DMHOME/src/kmeans/example -i $DMHOME/datasets/kmeans/edge -b -o -p 4
+
+Other datasets: color, texture
+
+
+---------------------------
+Fuzzy Kmeans:Parallel
+---------------------------
+$DMHOME/src/kmeans/example -i $DMHOME/datasets/kmeans/edge -b -o -f -p 4
+
+Other datasets: color, texture
+
+
+
+---------------------------
+birch:Serial
+---------------------------
+$DMHOME/src/birch/birch $DMHOME/datasets/birch/AMR_64.para $DMHOME/datasets/birch/AMR_64.scheme $DMHOME/datasets/birch/AMR_64.proj $DMHOME/datasets/birch/particles_0_64_ascii
+
+
+
+---------------------------
+ECLAT:Serial
+---------------------------
+$DMHOME/src/ECLAT/eclat -i $DMHOME/datasets/ECLAT/ntrans_2000.tlen_20.nitems_1.npats_2000.patlen_6 -e 30 -s 0.0075
+
+
+
+---------------------------
+SNP:Parallel
+---------------------------
+NOTE: Set OMP_NUM_THREADS (using the export, set, or setenv command) in console environment before issuing this command
+
+$DMHOME/src/SNP/pnl.snps/snp/snp  $DMHOME/datasets/SNP/snp_s_ar 
+
+
+
+---------------------------
+GeneNet:Parallel
+---------------------------
+NOTE: Set OMP_NUM_THREADS in console environment before issuing this command
+
+$DMHOME/src/GeneNet/pnl.genenet/genenet/genenet.icc $DMHOME/datasets/GeneNet/microarray.int
+
+
+
+---------------------------
+semphy:Serial
+---------------------------
+$DMHOME/src/semphy/semphy -s $DMHOME/datasets/semphy/108.phy -f phylip -m jtt -G 0.3
+
+
+
+---------------------------
+semphy:Parallel
+---------------------------
+NOTE: Set OMP_NUM_THREADS in console environment before issuing this command
+
+$DMHOME/src/semphy/semphy.mt -s $DMHOME/datasets/semphy/108.phy -f phylip -m jtt -G 0.3
+
+
+
+---------------------------
+RSEARCH:Parallel(openmp)
+---------------------------
+NOTE: Set OMP_NUM_THREADS in console environment before issuing this command
+
+./rsearch -n 1000 -c -E 10 -m $DMHOME/datasets/rsearch/matrices/RIBOSUM85-60.mat \
+                              $DMHOME/datasets/rsearch/Queries/mir-40.stk \
+                              $DMHOME/datasets/rsearch/Databasefile/100Kdb.fa
+
+
+
+---------------------------
+RSEARCH:Parallel(MPI)
+---------------------------
+mpirun -np 4 ./rsearch -n 1000 -c -E 10 \
+                       -m $DMHOME/datasets/rsearch/matrices/RIBOSUM85-60.mat \
+                          $DMHOME/datasets/rsearch/Queries/mir-40.stk \
+                          $DMHOME/datasets/rsearch/Databasefile/100Kdb.fa
+
+* mpirun -np N :where N is the number of processors.
+
+
+
+---------------------------
+PLSA:Parallel
+---------------------------
+$DMHOME/src/PLSA/parasw.mt $DMHOME/datasets/PLSA/30k_1.txt $DMHOME/datasets/PLSA/30k_2.txt $DMHOME/datasets/PLSA/pam120.bla 600 400 3 3 1 4
+
+
+
+---------------------------
+SVM_RFE:Parallel
+---------------------------
+NOTE: Set OMP_NUM_THREADS in console environment before issuing this command
+
+$DMHOME/src/SVM-RFE/svm_rfe/svm_mkl $DMHOME/datasets/SVM-RFE/outData.txt 253 15154 30
+
+
+
+----------------------------------------------
+Utility_Mining:Parallel with real dataset
+----------------------------------------------
+Utility_Mining/para_tran_utility/utility_mine $DMHOME/datasets/utility_mine/RealData/real_data_aa_binary $DMHOME/datasets/utility_mine/RealData/real_data_aa_binary_P4.txt $DMHOME/datasets/utility_mine/RealData/product_price_binary 0.01 4
+
+
+
+----------------------------------------------
+Utility_Mining:Parallel with synthetic dataset
+----------------------------------------------
+Utility_Mining/para_tran_utility/utility_mine $DMHOME/datasets/utility_mine/GEN/data.ntrans_1000.tlen_10.nitems_1.patlen_6 $DMHOME/datasets/utility_mine/GEN/offset_1000_10_1/offset_1000_10_1_6_P4.txt $DMHOME/datasets/utility_mine/GEN/logn1000_binary 0.01 4
+
+
+
+----------------------------------------------
+Utility_Mining:Serial with real dataset
+----------------------------------------------
+Utility_Mining/tran_utility/utility_mine $DMHOME/datasets/utility_mine/RealData/real_data_aa_binary  $DMHOME/datasets/utility_mine/RealData/product_price_binary 0.01 
+
+
+----------------------------------------------
+Utility_Mining:Serial with synthetic dataset
+----------------------------------------------
+Utility_Mining/tran_utility/utility_mine $DMHOME/datasets/utility_mine/GEN/data.ntrans_1000.tlen_10.nitems_1.patlen_6 $DMHOME/datasets/utility_mine/GEN/logn1000_binary 0.01
+
+---------------------------
+AFI:Serial
+---------------------------
+$DMHOME/src/afi/afi $DMHOME/datasets/ETI/<dataset> minsup epsCol epsRow
+
+---------------------------
+Greedy ETI:Serial
+---------------------------
+$DMHOME/src/geti/geti $DMHOME/datasets/ETI/<dataset> minsup eps
+
+---------------------------
+Greedy ETI with post processing:Serial
+---------------------------
+$DMHOME/src/getipp/getipp $DMHOME/datasets/ETI/<dataset> minsup epsCol epsRow
+
+---------------------------
+Recursive Weak:Serial
+---------------------------
+Recursive_Weak/rw $DMHOME/datasets/ETI/<dataset> minsup eps
+
+---------------------------
+Recursive Weak with post processing:Serial
+---------------------------
+Recursive_Weak_pp/rwpp $DMHOME/datasets/ETI/<dataset> minsup epsCol epsRow
+
+---------------------------
+Parallel ETI:Parallel(MPI)
+---------------------------
+mpirun -np N $DMHOME/src/ParETI/pareti $DMHOME/datasets/ETI/<dataset> support epsilon hconf
+
+where N is the number of processors
+
+
+
+
+
