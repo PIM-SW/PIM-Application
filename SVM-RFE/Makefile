@@ -2,15 +2,14 @@
 ################OPTION###################
 CCOMPILE = gcc
 CPPCOMPILE = g++
-COMPILEOPTION = -g -fopenmp -D_OPT
+COMPILEOPTION = -g -D_OPT -fopenmp -D_MKL
 # INCLUDEDIR = -I/opt/intel/vtune/analyzer/include -I/opt/intel/mkl721/include
-INCLUDEDIR = -I. -I/home/arcuser/pimiitp/OpenBLAS -I/opt/intel/oneapi/mkl/latest/include
+INCLUDEDIR = -I. -I/opt/intel/oneapi/mkl/latest/include # -I/home/arcuser/pimiitp/OpenBLAS
 LIBHOME = 
 LINK = g++
-LINKOPTION = -g -fopenmp -o ./svm_mkl
-LIBS =  /opt/intel/mkl721/lib/32/libmkl_ia32.a
-LIBS =  -lopenblas -lpthread
-LIBDIRS =  -L/home/arcuser/pimiitp/OpenBLAS
+LINKOPTION = -g -fopenmp -Wl,-rpath=/opt/intel/oneapi/mkl/latest/lib/intel64 -o ./svm_mkl
+LIBS = -lpthread -lmkl_intel_ilp64 -lmkl_gnu_thread -lmkl_core#-lopenblas
+LIBDIRS =  -L/opt/intel/oneapi/mkl/latest/lib/intel64 #-L/home/arcuser/pimiitp/OpenBLAS
 OBJS = wtime.o svm.o svm_rfe.o svm_rfe_test.o
 OUTPUT = ./svm_mkl
 ################OPTION END################

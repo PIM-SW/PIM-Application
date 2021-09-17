@@ -388,7 +388,7 @@ bool Svm_RFE::init_svm_param()
 	param.nu = 0.1;
 	param.cache_size = 100;
 	param.C = 100000;
-	param.eps = 1e-3;
+	param.eps = 5e-3;
 	param.p = 0.1;
 	// param.shrinking = 1;
 	param.shrinking = 0;
@@ -1234,6 +1234,7 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 	int i;
 
 	error_msg = svm_check_parameter(&prob,&param);  // check the parameters
+	printf("okay after check\n");
 	if(error_msg)
 	{
 		error_message(error_msg);
@@ -1246,8 +1247,8 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 		RemainedCol[i] = i;
 	}
 	
-
-	normalize(prob);    
+	normalize(prob); 
+   
 	 // normalize the data.  if  we use the normalized data we should not do the procedure 
 	 // if we do not have normalzie the data we should normalzie  the data.
 	 // something maybe happend if we do not do normalize.	

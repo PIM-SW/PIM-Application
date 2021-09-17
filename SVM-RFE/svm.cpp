@@ -11,7 +11,7 @@
 #ifdef _MKL
 #include "mkl.h"
 #else
-#include <cblas.h>
+#include <mkl.h>
 #endif
 
 #ifndef WIN32
@@ -669,11 +669,47 @@ void Solver::Solve(int l, const Kernel& Q, const float *b_, const schar *y_,
 
 		float delta_alpha_i = alpha[i] - old_alpha_i;
 		float delta_alpha_j = alpha[j] - old_alpha_j;
-		
+/*
+#ifdef _MKL
+#pragma omp parallel for schedule(dynamic)
+#endif
+*/	
+		//printf("asdfasdf\n");
+		/*
+		float copy1_G[l];
+		float copy_G[l];
+		cblas_scopy(l, G, 1, copy_G, 1);
+		cblas_scopy(l, G, 1, copy1_G, 1);
 		for(int k=0;k<active_size;k++)
 		{
-			G[k] += Q_i[k]*delta_alpha_i + Q_j[k]*delta_alpha_j;
+			if(G[k]!=copy_G[k]){
+				printf("not same1!!\n");
+				printf("%f, %f\n",G[k],copy_G[k]);
+			}
 		}
+		*/
+		cblas_saxpy(active_size, delta_alpha_i, Q_i, 1, G, 1 );
+		cblas_saxpy(active_size, delta_alpha_j, Q_j, 1, G, 1 );
+
+		
+		/*
+		for(int k=0;k<active_size;k++)
+		{
+			copy_G[k] += Q_i[k]*delta_alpha_i + Q_j[k]*delta_alpha_j;
+		}
+
+		for(int k=0;k<active_size;k++)
+		{
+			if(G[k]!=copy_G[k]){
+				printf("not same2!!\n");
+				printf("%f, %f %f\n",G[k],copy_G[k], copy1_G[k]);
+				printf("%f, %f\n",Q_i[k]*delta_alpha_i,Q_j[k]*delta_alpha_j);
+				printf("%f\n", eps);
+			}
+		}
+		*/
+
+		
 
 		// update alpha_status and G_bar
 
@@ -1003,6 +1039,8 @@ int Solver_NU::select_working_set(int &out_i, int &out_j)
 		}
 	}
 
+	//printf("1040 %f %f %f \n",Gmax1+Gmax2,Gmax3+Gmax4,eps);
+
 	if(max(Gmax1+Gmax2,Gmax3+Gmax4) < eps)
  		return 1;
 
@@ -1189,7 +1227,6 @@ public:
 				data[j] = (Qfloat)(y[i]*y[j]*(this->*kernel_function)(i,j));
 #else // _MKL
 			// Method 2, parallel version on CASES
-			
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
@@ -1733,7 +1770,7 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
 					sub_prob.y[ci+k] = -1;
 				}
 
-#ifdef _MKL
+#ifdef _MKL	
 				for (int m = 0; m < sub_prob.l; m++)
 					for (int n = 0; n < nGeneLength; n++)
 						ppMatrix[m][n] = sub_prob.x[m][n].value;
@@ -2554,6 +2591,7 @@ const char *svm_check_parameter(const svm_problem *prob, const svm_parameter *pa
 					count = (int *)realloc(count,max_nr_class*sizeof(int));
 				}
 				label[nr_class] = this_label;
+				printf("%d\n", this_label);
 				count[nr_class] = 1;
 				++nr_class;
 			}
@@ -2565,11 +2603,12 @@ const char *svm_check_parameter(const svm_problem *prob, const svm_parameter *pa
 			for(int j=i+1;j<nr_class;j++)
 			{
 				int n2 = count[j];
+				printf("%d %d %f\n", n1, n2, param->nu*(n1+n2)/2);
 				if(param->nu*(n1+n2)/2 > min(n1,n2))
 				{
 					free(label);
 					free(count);
-					return "specified nu is infeasible";
+					return "specified nu is infeasible\n";
 				}
 			}
 		}

@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef _MKL
-	ppMatrix = (float **) malloc (sizeof(float) * CASES);
+	ppMatrix = (float **) malloc (sizeof(float *) * CASES);
 
 	for (i = 0; i < CASES; i++)
 		ppMatrix[i] = (float *) alignMalloc (sizeof(float) * GENES);
