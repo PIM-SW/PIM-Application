@@ -651,14 +651,18 @@ bool Svm_RFE::eliminate(vector<WEIGHT>& weights,struct svm_problem& prob)
 		if(weights[i].marked == true)
 		{
 			printf("Deleted(%d)\n", prob.x[0][i].index);
-			for(m=0; m<MATRIX_M; m++)
-			{
+			if(i!= weights.size()-1){
+				for(m=0; m<MATRIX_M; m++){
 #ifndef _OPT
-				memcpy (&(prob.x[m][i]), &(prob.x[m][i+1]), sizeof(struct svm_node)*(weights.size()-i));
+					memcpy (&(prob.x[m][i]), &(prob.x[m][i+1]), sizeof(struct svm_node)*(weights.size()-1-count-i));
 #else
-				memcpy (&(prob.x[m][i]), &(prob.x[m][nGeneLength-1]), sizeof(struct svm_node));
+					memcpy (&(prob.x[m][i]), &(prob.x[m][weights.size()-1-count-1]), sizeof(struct svm_node));
+					//memcpy (&(prob.x[m][i]), &(prob.x[m][i+1]), sizeof(struct svm_node)*(weights.size()-1-count-i));
 #endif
+				}
 			}
+			count++;
+
 			temp.ID = RemainedCol[i];
 			temp.weight = weights[i].weight;
 			weightEl.push_back(temp);
@@ -1284,9 +1288,9 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 		
 			int temp= weights.size();		
 #ifndef WIN32
-			printf ("Remains(%d), time(%.2fs), ", temp, timer_read(0));
+			printf ("Remains(%d), time(%.2fs), \n", temp, timer_read(0));
 #else		
-			printf ("Remains(%d) time(%2.1fs), ", temp, (float)(end_t - start_t)/CLOCKS_PER_SEC);
+			printf ("Remains(%d) time(%2.1fs), \n", temp, (float)(end_t - start_t)/CLOCKS_PER_SEC);
 #endif
 
 #ifndef WIN32
@@ -1325,12 +1329,12 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 			{
 				eliminateHistory.weightEl.push_back(weightEl[i]);
 			}
-			eliminateHistory.RemainSize = present.RemaineddCol.size();
+			eliminateHistory.RemainSize = RemainedCol.size();
 
 			eliminateHistory.iterator = iterator;
+			nGeneLength = RemainedCol.size();
 
    			model = svm_train(&prob, &param);  // get new train on new Microarray dataset.
-			nGeneLength--;
 
 			get_weight(model);
 #ifndef WIN32

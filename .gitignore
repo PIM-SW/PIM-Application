@@ -1,3 +1,5 @@
 SVM-RFE/*.o
 SVM-RFE/Dataset/SVM-RFE/SRA742961_SRS3565197.mat
 .vscode/settings.json
+SVM-RFE/ranking.txt
+SVM-RFE/names.txt

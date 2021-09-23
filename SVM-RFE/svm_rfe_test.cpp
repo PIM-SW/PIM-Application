@@ -62,8 +62,8 @@ int main(int argc, char* argv[])
 
 	HISTORY eliminateHistory;
 	
-	ofstream fprank("./data/ranking.txt");
-	ifstream fpname("./data/names.txt");
+	ofstream fprank("./ranking.txt");
+	ifstream fpname("./names.txt");
 	
 	string* GeneID;
 	GeneID = new string[GENES];

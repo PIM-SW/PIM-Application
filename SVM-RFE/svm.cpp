@@ -1229,7 +1229,8 @@ public:
 			// Method 2, parallel version on CASES
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
-#endif
+#endif		
+			//TODO: make it GEMV compare performance with openmp
 			for(int j=start;j<len;j++)			
 				data[j] = (Qfloat)(y[i]*y[j]* cblas_sdot (nGeneLength, ppMatrix[i], 1, ppMatrix[j], 1));
 
