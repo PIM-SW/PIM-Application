@@ -7,7 +7,7 @@ A classification benchmark from [Minebench: A Benchmark Suite for Data Mining Wo
 ```bash
 # Set OMP_NUM_THREADS
 $ make
-$ ./svm_mkl <dataset> <# of samples> <# of genes> <# of iterations>`
+$ ./svm_mkl <dataset> <sample count> <gene count> <iteration count>
 ```
 
 ### Dataset
