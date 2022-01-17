@@ -90,9 +90,14 @@ from torch.nn.parameter import Parameter
 from torch.optim.lr_scheduler import _LRScheduler
 import optim.rwsadagrad as RowWiseSparseAdagrad
 from torch.utils.tensorboard import SummaryWriter
-from torch.utils.cpp_extension import load
 
-embedding_reduction_sum = load(name="embedding_reduction_sum", sources=["embedding_reduction.cpp"], verbose=True)
+
+from torch.utils.cpp_extension import load
+embedding_reduction_sum = load(name="embedding_reduction_sum", 
+                            sources=["embedding_reduction.cpp"], 
+                            extra_cflags=['-DMKL_LIBRARIES=/opt/intel/mkl/lib/intel64', '-fopenmp'],
+                            extra_include_paths=['/opt/intel/mkl/include'],
+                            verbose=True)
 
 # mixed-dimension trick
 from tricks.md_embedding_bag import PrEmbeddingBag, md_solver

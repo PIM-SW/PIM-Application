@@ -18,6 +18,7 @@
 #include <iostream>
 #include <vector>
 #include <omp.h>
+#include <mkl.h>
 
 #define PRINT_ENABLE false
 
@@ -106,9 +107,10 @@ torch::Tensor embedding_reduction_sum(
   #pragma omp parallel for
   for (int i = 0; i < batch; i++) {
     for (int j = offsets_ptr[i]; j < (i == (batch-1) ? num_reduction : offsets_ptr[i+1]); j++) {
-      for (int k = 0; k < dim; k++) {
-        output_ptr[dim*i + k] += per_sample_weights_ptr[j] * weight_ptr[dim*input_ptr[j] + k];
-      }
+      // for (int k = 0; k < dim; k++) {
+      //   output_ptr[dim*i + k] += per_sample_weights_ptr[j] * weight_ptr[dim*input_ptr[j] + k];
+      // }
+      cblas_saxpy(dim, per_sample_weights_ptr[j], weight_ptr + dim*input_ptr[j], 1, output_ptr + dim*i, 1);
     }
   }
 
@@ -143,9 +145,10 @@ torch::Tensor embedding_reduction_sum2(
   #pragma omp parallel for
   for (int i = 0; i < batch; i++) {
     for (int j = offsets_ptr[i]; j < (i == (batch-1) ? num_reduction : offsets_ptr[i+1]); j++) {
-      for (int k = 0; k < dim; k++) {
-        output_ptr[dim*i + k] += weight_ptr[dim*input_ptr[j] + k];
-      }
+      // for (int k = 0; k < dim; k++) {
+      //   output_ptr[dim*i + k] += weight_ptr[dim*input_ptr[j] + k];
+      // }
+      cblas_saxpy(dim, 1, weight_ptr + dim*input_ptr[j], 1, output_ptr + dim*i, 1);
     }
   }
 
