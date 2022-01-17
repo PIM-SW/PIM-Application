@@ -16,5 +16,20 @@ $ ./svm_mkl <dataset> <sample count> <gene count> <iteration count>
 ### Profiling
 * base: base.txt
 
-## Reduction
+## EmbeddingReduction
 A basic vector reduction kernel used in recommendation systems (Embedding Reduction) and graph neural networks (Feature Aggregation).
+
+### How to Run
+```bash
+# install torch
+$ pip3 install torch==1.10.1+cpu torchvision==0.11.2+cpu torchaudio==0.10.1+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+# install Ninja
+$ sudo apt-get install ninja-build
+# install mkl
+$ sudo pip3 install mkl
+# mlperf-loggin (optional)
+$ git clone https://github.com/mlperf/logging.git mlperf-logging
+$ pip install -e mlperf-logging
+# run as RMC2 config
+$ ./run.sh <pooling size> <query count>
+```
