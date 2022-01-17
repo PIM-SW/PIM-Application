@@ -92,7 +92,7 @@ import optim.rwsadagrad as RowWiseSparseAdagrad
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.cpp_extension import load
 
-embedding_reduction_sum = load(name="embedding_reduction_sum", sources=["embedding_reduction.cpp"])
+embedding_reduction_sum = load(name="embedding_reduction_sum", sources=["embedding_reduction.cpp"], verbose=True)
 
 # mixed-dimension trick
 from tricks.md_embedding_bag import PrEmbeddingBag, md_solver
@@ -444,17 +444,28 @@ class DLRM_Net(nn.Module):
                 E = emb_l[k]
  
                 # Custom Implementation
-                V = embedding_reduction_sum.forward2(sparse_index_group_batch,
+                start = time.time()
+                V1 = embedding_reduction_sum.forward2(sparse_index_group_batch,
                                                 E.weight.data,
                                                 sparse_offset_group_batch)
+                global emb_custom_time
+                emb_custom_time += (time.time() - start)
+                
                 # Original Implementation
-                # V = E(
-                #     sparse_index_group_batch,
-                #     sparse_offset_group_batch,
-                #     per_sample_weights=per_sample_weights,
-                # )
+                start = time.time()
+                V2 = E(
+                    sparse_index_group_batch,
+                    sparse_offset_group_batch,
+                    per_sample_weights=per_sample_weights,
+                )
+                global emb_original_time
+                emb_original_time += (time.time() - start)
 
-                ly.append(V)
+                if not (torch.all(V1.eq(V2))):
+                    print("=============== Custom reduction error! ================")
+                    sys.exit()
+
+                ly.append(V2)
 
         # print(ly)
         return ly
@@ -899,7 +910,7 @@ def inference(
     return model_metrics_dict, is_best
 
 
-def run():
+def run(): 
     ### parse arguments ###
     parser = argparse.ArgumentParser(
         description="Train Deep Learning Recommendation Model (DLRM)"
@@ -1884,4 +1895,13 @@ def run():
 
 
 if __name__ == "__main__":
+    global emb_custom_time
+    global emb_original_time
+    emb_custom_time = 0
+    emb_original_time = 0
+
     run()
+
+    print("Original: %.2f" % emb_original_time)
+    print("Custom: %.2f" % emb_custom_time)
+    print("Ratio: %.2f" % (emb_custom_time / emb_original_time))
