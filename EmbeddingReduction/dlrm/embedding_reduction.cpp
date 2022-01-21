@@ -19,6 +19,7 @@
 #include <vector>
 #include <omp.h>
 #include <mkl.h>
+#include <advisor-annotate.h>
 
 #define PRINT_ENABLE false
 
@@ -123,6 +124,7 @@ torch::Tensor embedding_reduction_sum2(
   torch::Tensor weight,// embedding matrix/table of (N, M)
   torch::Tensor offsets // 1D Tensor of starting index position of each bag (sequence) in input
 ) {
+  
 
   int batch = offsets.sizes()[0];
   int dim = weight.sizes()[1];
@@ -142,15 +144,18 @@ torch::Tensor embedding_reduction_sum2(
   long *offsets_ptr = offsets.data_ptr<long>();
   float *output_ptr = output.data_ptr<float>();
 
+  ANNOTATE_SITE_BEGIN(reduction);
   #pragma omp parallel for
   for (int i = 0; i < batch; i++) {
     for (int j = offsets_ptr[i]; j < (i == (batch-1) ? num_reduction : offsets_ptr[i+1]); j++) {
       // for (int k = 0; k < dim; k++) {
       //   output_ptr[dim*i + k] += weight_ptr[dim*input_ptr[j] + k];
       // }
+      ANNOTATE_ITERATION_TASK(saxpy);
       cblas_saxpy(dim, 1, weight_ptr + dim*input_ptr[j], 1, output_ptr + dim*i, 1);
     }
   }
+  ANNOTATE_SITE_BEGIN(reduction);
 
   return output;
 }
