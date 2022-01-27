@@ -4,7 +4,7 @@
 #   Tables: <= 40
 #   Lookup: ~80
 #   Pooling: Sum
-
+# Experiment with $1=80, $2=10000
 python3 dlrm_s_pytorch.py \
     --arch-sparse-feature-size=32 \
     --arch-mlp-bot="256-128-32" \
@@ -12,7 +12,7 @@ python3 dlrm_s_pytorch.py \
     --loss-function=bce \
     --round-targets=True \
     --learning-rate=0.1 \
-    --mini-batch-size=32768 \
+    --mini-batch-size=32 \
     --inference-only \
     --num-indices-per-lookup $1 \
     --data-size=$2 \
