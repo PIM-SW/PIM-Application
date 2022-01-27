@@ -304,19 +304,15 @@ float Kernel::dot(const svm_node *px, const svm_node *py)
 		}			
 	}
 #else
-	//float sum = 0;
-	int inc = 2;
-	float sum = cblas_sdot(nGeneLength, &px->value, inc, &py->value, inc);
-	/*
+	float sum = 0;
 	for (int i = 0; i < nGeneLength; i++)
 	{
-		
 		sum += px->value * py->value;
 		px ++;
 		py ++;
 	}
-	printf("%lf, %lf\n", sum, test_sum);
-	*/
+  //int inc = 2;
+  //float sum = cblas_sdot(nGeneLength, &px->value, inc, &py->value, inc);
 #endif
 	return sum;
 }
@@ -669,28 +665,10 @@ void Solver::Solve(int l, const Kernel& Q, const float *b_, const schar *y_,
 
 		float delta_alpha_i = alpha[i] - old_alpha_i;
 		float delta_alpha_j = alpha[j] - old_alpha_j;
-/*
-#ifdef _MKL
-#pragma omp parallel for schedule(dynamic)
-#endif
-*/	
-		//printf("asdfasdf\n");
-		/*
-		float copy1_G[l];
-		float copy_G[l];
-		cblas_scopy(l, G, 1, copy_G, 1);
-		cblas_scopy(l, G, 1, copy1_G, 1);
-		for(int k=0;k<active_size;k++)
-		{
-			if(G[k]!=copy_G[k]){
-				printf("not same1!!\n");
-				printf("%f, %f\n",G[k],copy_G[k]);
-			}
-		}
-		*/
+
+		// [CHJ] PIM function should replace here.
 		cblas_saxpy(active_size, delta_alpha_i, Q_i, 1, G, 1 );
 		cblas_saxpy(active_size, delta_alpha_j, Q_j, 1, G, 1 );
-
 		
 		/*
 		for(int k=0;k<active_size;k++)
@@ -1211,6 +1189,7 @@ public:
 		cache = new Cache(prob.l,(int)(param.cache_size*(1<<20)));
 	}
 
+	// [CHJ] cblas_sdot here.
 	Qfloat *get_Q(int i, int len) const
 	{			
 		Qfloat *data;		
@@ -1223,14 +1202,16 @@ public:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
+			// [CHJ] Method 1, calling Kernel::dot.
 			for(int j=start;j<len;j++)			
 				data[j] = (Qfloat)(y[i]*y[j]*(this->*kernel_function)(i,j));
 #else // _MKL
 			// Method 2, parallel version on CASES
+			
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif		
-			//TODO: make it GEMV compare performance with openmp
+			// [CHJ] replace cblas_sdot with PIM API.
 			for(int j=start;j<len;j++)			
 				data[j] = (Qfloat)(y[i]*y[j]* cblas_sdot (nGeneLength, ppMatrix[i], 1, ppMatrix[j], 1));
 
@@ -1431,6 +1412,8 @@ static void solve_nu_svc(
 		zeros[i] = 0;
 
 	Solver_NU s;
+
+	// [CHJ] this calls cblas.
 	s.Solve(l, SVC_Q(*prob,*param,y), zeros, y,
 		alpha, 1.0, 1.0, param->eps, si,  param->shrinking);
 	float r = si->r;
@@ -1577,6 +1560,7 @@ decision_function svm_train_one(
 			solve_c_svc(prob,param,alpha,&si,Cp,Cn);
 			break;
 		case NU_SVC:
+			// [CHJ] solving here.
 			solve_nu_svc(prob,param,alpha,&si);
 			break;
 		case ONE_CLASS:
@@ -1672,6 +1656,7 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
 	{
 		// classification
 		// find out the number of classes
+		// [CHJ] trainining nu-classification.
 		int l = prob->l;
 		int max_nr_class = 16;
 		int nr_class = 0;
@@ -1724,6 +1709,7 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
 		for(i=1;i<nr_class;i++)
 			start[i] = start[i-1]+count[i-1];
 
+		
 		// calculate weighted C
 
 		float *weighted_C = Malloc(float, nr_class);
@@ -1748,8 +1734,9 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
 			nonzero[i] = false;
 		decision_function *f = Malloc(decision_function,nr_class*(nr_class-1)/2);
 
+		// [CHJ] nr_class = 2, this double for-loop is executed once.
 		int p = 0;
-		for(i=0;i<nr_class;i++)
+		for(i=0;i<nr_class;i++) {
 			for(int j=i+1;j<nr_class;j++)
 			{
 				svm_problem sub_prob;
@@ -1758,7 +1745,7 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
 				sub_prob.l = ci+cj;
 				sub_prob.x = Malloc(svm_node *,sub_prob.l);
 				sub_prob.y = Malloc(float,sub_prob.l);
-				int k;					
+				int k;		
 
 				for(k=0;k<ci;k++)
 				{
@@ -1776,7 +1763,7 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
 					for (int n = 0; n < nGeneLength; n++)
 						ppMatrix[m][n] = sub_prob.x[m][n].value;
 #endif
-				
+				// [CHJ] svm_train_one calls solve (cblas).
 				f[p] = svm_train_one(&sub_prob,param,weighted_C[i],weighted_C[j]);
 				for(k=0;k<ci;k++)
 					if(!nonzero[si+k] && fabs(f[p].alpha[k]) > 0)
@@ -1788,6 +1775,7 @@ svm_model *svm_train(const svm_problem *prob, const svm_parameter *param)
 				free(sub_prob.y);
 				++p;
 			}
+		}
 
 		// build output
 
@@ -2592,7 +2580,6 @@ const char *svm_check_parameter(const svm_problem *prob, const svm_parameter *pa
 					count = (int *)realloc(count,max_nr_class*sizeof(int));
 				}
 				label[nr_class] = this_label;
-				printf("%d\n", this_label);
 				count[nr_class] = 1;
 				++nr_class;
 			}
@@ -2604,7 +2591,6 @@ const char *svm_check_parameter(const svm_problem *prob, const svm_parameter *pa
 			for(int j=i+1;j<nr_class;j++)
 			{
 				int n2 = count[j];
-				printf("%d %d %f\n", n1, n2, param->nu*(n1+n2)/2);
 				if(param->nu*(n1+n2)/2 > min(n1,n2))
 				{
 					free(label);

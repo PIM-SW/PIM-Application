@@ -159,6 +159,7 @@ bool Svm_RFE::dump_matrix(vector<vector<float> >& array,string FileName)
 	return true;
 }
 
+// [CHJ] This compute_start is called.
 bool Svm_RFE::compute_start(string FileName, int M, int N,HISTORY & eliminateHistory)
 {
 	bool bRet;
@@ -650,7 +651,7 @@ bool Svm_RFE::eliminate(vector<WEIGHT>& weights,struct svm_problem& prob)
 	{
 		if(weights[i].marked == true)
 		{
-			printf("Deleted(%d)\n", prob.x[0][i].index);
+			// printf("Deleted(%d)\n", prob.x[0][i].index);
 			if(i!= weights.size()-1){
 				for(m=0; m<MATRIX_M; m++){
 #ifndef _OPT
@@ -1238,7 +1239,6 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 	int i;
 
 	error_msg = svm_check_parameter(&prob,&param);  // check the parameters
-	printf("okay after check\n");
 	if(error_msg)
 	{
 		error_message(error_msg);
@@ -1271,7 +1271,6 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 	get_weight(model);                   // get weights of each (genes)features
 	abs_weight(weights);                 // abs(weights)
 
-
 #ifndef WIN32
 	timer_stop(0);
 	total = timer_read(0);
@@ -1279,13 +1278,11 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 	end_t = clock();
 	total = (float)(end_t - start_t)/CLOCKS_PER_SEC;
 #endif
-	
 
     if(nIteration == 0)
 	{
 		while(weights.size() > features)// if the remain genes(features) is less than the feature remained we go out loops 
 		{
-		
 			int temp= weights.size();		
 #ifndef WIN32
 			printf ("Remains(%d), time(%.2fs), \n", temp, timer_read(0));
@@ -1352,9 +1349,9 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 		{	
 			int temp= weights.size();		
 #ifndef WIN32
-			printf ("Remains(%d), time(%.2fs), ", temp, timer_read(0));
+			printf ("Remaining genes (%d), time(%.2fs)\n", temp, timer_read(0));
 #else		
-			printf ("Remains(%d) time(%2.1fs), ", temp, (float)(end_t - start_t)/CLOCKS_PER_SEC);
+			printf ("Remaining genes (%d) time(%2.1fs)\n", temp, (float)(end_t - start_t)/CLOCKS_PER_SEC);
 #endif
 
 #ifndef WIN32
