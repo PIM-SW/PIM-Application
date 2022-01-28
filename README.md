@@ -8,13 +8,13 @@ A classification benchmark from [Minebench: A Benchmark Suite for Data Mining Wo
 # Set OMP_NUM_THREADS
 $ make
 $ ./svm_mkl <dataset> <sample count> <gene count> <iteration count>
+# intel advisor
+$ /opt/intel/oneapi/advisor/2021.1.1/bin64/advisor -collect roofline -interval=1 -data-limit=510 -profile-python -project-dir /home/arc-x7/hyunji/PIM-Application/SVM-RFE -- ./svm_mkl Dataset/large.txt 180 54675
 ```
 
 ### Dataset
 * base.txt: Ovarian cancer samples / 253 15154 30
-
-### Profiling
-* base: base.txt
+* large.txt: 180 54675
 
 ## EmbeddingReduction
 A basic vector reduction kernel used in recommendation systems (Embedding Reduction) and graph neural networks (Feature Aggregation).
