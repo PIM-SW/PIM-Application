@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 #endif
 	for(j=0;j<eliminateHistory.weightEl.size();j++)
 	{		
-		fprank << eliminateHistory.weightEl[j].ID << " \t" << eliminateHistory.weightEl[j].weight << "\t"<<GeneID[eliminateHistory.weightEl[j].ID].c_str() << "\n"; //output
+		fprank << eliminateHistory.weightEl[j].ID << " \t" << eliminateHistory.weightEl[j].weight << "\n"; //output
 	}
 	fprank.close();
 

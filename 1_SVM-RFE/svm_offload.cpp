@@ -670,6 +670,11 @@ void Solver::Solve(int l, const Kernel& Q, const float *b_, const schar *y_,
 		cblas_saxpy(active_size, delta_alpha_i, Q_i, 1, G, 1 );
 		cblas_saxpy(active_size, delta_alpha_j, Q_j, 1, G, 1 );
 		
+		// for(int k=0;k<active_size;k++)
+		// {
+		// 	G[k] += Q_i[k]*delta_alpha_i + Q_j[k]*delta_alpha_j;
+		// }		
+
 		/*
 		for(int k=0;k<active_size;k++)
 		{

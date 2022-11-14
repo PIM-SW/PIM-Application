@@ -27,4 +27,4 @@ $(OUTPUT):$(OBJS)
 
 clean: 
 	rm -f $(OBJS)
-	rm -f $(OUTPUT) ranking.txt
+	rm -f $(OUTPUT) ./ranking_baseline.txt ./ranking_offload.txt
