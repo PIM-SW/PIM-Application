@@ -1,5 +1,7 @@
-SVM-RFE/*.o
-SVM-RFE/Dataset/SVM-RFE/SRA742961_SRS3565197.mat
 .vscode/settings.json
-SVM-RFE/ranking.txt
-SVM-RFE/names.txt
+1_SVM-RFE/*.o
+1_SVM-RFE/ranking.txt
+2_EmbeddingReduction/dlrm/__pycache__/
+2_EmbeddingReduction/dlrm/run_kaggle_pt/
+3_ConvNet/__pycache__/
+
