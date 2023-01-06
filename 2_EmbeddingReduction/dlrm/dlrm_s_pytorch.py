@@ -72,7 +72,7 @@ import dlrm_data_pytorch as dp
 
 # For distributed run
 import extend_distributed as ext_dist
-import mlperf_logger
+# import mlperf_logger
 
 # numpy
 import numpy as np
@@ -91,18 +91,26 @@ from torch.optim.lr_scheduler import _LRScheduler
 import optim.rwsadagrad as RowWiseSparseAdagrad
 from torch.utils.tensorboard import SummaryWriter
 
+
+from torch.utils.cpp_extension import load
+embedding_reduction_sum = load(name="embedding_reduction_sum", 
+                           sources=["embedding_reduction.cpp"], 
+                        #    extra_cflags=['-DMKL_LIBRARIES=/opt/intel/oneapi/mkl/latest/lib/intel64', '-fopenmp'],
+                        #    extra_include_paths=['opt/intel/oneapi/mkl/latest/include', '/opt/intel/oneapi/advisor/latest/include'],
+                           verbose=False)
+
 # mixed-dimension trick
 from tricks.md_embedding_bag import PrEmbeddingBag, md_solver
 
 # quotient-remainder trick
 from tricks.qr_embedding_bag import QREmbeddingBag
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    try:
-        import onnx
-    except ImportError as error:
-        print("Unable to import onnx. ", error)
+# with warnings.catch_warnings():
+#    warnings.filterwarnings("ignore", category=DeprecationWarning)
+#    try:
+#        import onnx
+#    except ImportError as error:
+#        print("Unable to import onnx. ", error)
 
 # from torchviz import make_dot
 # import torch.nn.functional as Functional
@@ -440,13 +448,29 @@ class DLRM_Net(nn.Module):
             else:
                 E = emb_l[k]
  
+                # Custom Implementation
+                # start = time.time()
+                V1 = embedding_reduction_sum.forward2(sparse_index_group_batch,
+                                               E.weight.data,
+                                               sparse_offset_group_batch)
+                # global emb_custom_time
+                # emb_custom_time += (time.time() - start)
+                
                 # Original Implementation
-                V = E(
-                    sparse_index_group_batch,
-                    sparse_offset_group_batch,
-                    per_sample_weights=per_sample_weights,
-                )
-                ly.append(V)
+                # start = time.time()
+                # V2 = E(
+                #     sparse_index_group_batch,
+                #     sparse_offset_group_batch,
+                #     per_sample_weights=per_sample_weights,
+                # )
+                # global emb_original_time
+                # emb_original_time += (time.time() - start)
+
+                # if not (torch.all(V1.eq(V2))):
+                #     print("=============== Custom reduction error! ================")
+                #     sys.exit()
+
+                ly.append(V1)
 
         # print(ly)
         return ly

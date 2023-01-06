@@ -9,8 +9,8 @@ from torchvision.transforms import ToTensor
 
 import numpy as np
 import argparse
-from resnet import ResNet18_baseline
-from resnet import ResNet18_offload
+# from resnet import ResNet18_baseline
+from resnet import ResNet18
 
 # Select Compute Device
 train_on_gpu = torch.cuda.is_available()
@@ -90,8 +90,7 @@ def test(dataloader, model, loss_fn):
     print(f"  Test Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
 # Load ResNet model
-model = ResNet18_baseline(num_classes=10).to(device)
-model2 = ResNet18_offload(num_classes=10).to(device)
+model = ResNet18(num_classes=10).to(device)
 
 # Loss Function and Optimizer
 loss_fn = nn.CrossEntropyLoss()
@@ -110,11 +109,7 @@ if not args.eval_only:
     torch.save(model.state_dict(), "ResNet18_CIFAR10.pt")
 
 # Evaluation
-print("Running Baseline...")
+print("Running ResNet18...")
 model.load_state_dict(torch.load('./ResNet18_CIFAR10.pt'))
 model.eval()
 test(test_dataloader, model, loss_fn)
-print("Running PIM Offload...")
-model2.load_state_dict(torch.load('./ResNet18_CIFAR10.pt'))
-model2.eval()
-test(test_dataloader, model2, loss_fn)

@@ -2,7 +2,7 @@
 ################OPTION###################
 CCOMPILE = gcc
 CPPCOMPILE = g++
-COMPILEOPTION = -g -D_OPT -fopenmp -D_MKL
+COMPILEOPTION = -w -D_OPT -fopenmp -D_MKL
 # INCLUDEDIR = -I/opt/intel/vtune/analyzer/include -I/opt/intel/mkl721/include
 INCLUDEDIR = -I. -I/opt/intel/oneapi/mkl/latest/include # -I/home/arcuser/pimiitp/OpenBLAS
 LIBHOME = 
@@ -27,4 +27,4 @@ $(OUTPUT):$(OBJS)
 
 clean: 
 	rm -f $(OBJS)
-	rm -f $(OUTPUT) ./ranking_baseline.txt ./ranking_offload.txt
+	rm -f $(OUTPUT) ./ranking.txt

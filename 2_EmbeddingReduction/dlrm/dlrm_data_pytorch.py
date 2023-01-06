@@ -37,7 +37,7 @@ import torch
 from torch.utils.data import Dataset, RandomSampler
 
 import data_loader_terabyte
-import mlperf_logger
+# import mlperf_logger
 
 
 # Kaggle Display Advertising Challenge Dataset

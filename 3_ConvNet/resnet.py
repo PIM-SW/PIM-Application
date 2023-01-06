@@ -81,10 +81,10 @@ class ResNet_baseline(nn.Module):
         y = self.fc(y)
         return y
 
-class ResNet_offload(nn.Module):
+class ResNet(nn.Module):
 
     def __init__(self, block, num_blocks, num_classes=10):
-        super(ResNet_offload, self).__init__()
+        super(ResNet, self).__init__()
         self.in_channels = 64
 
         self.relu = nn.ReLU()
@@ -126,5 +126,5 @@ class ResNet_offload(nn.Module):
 def ResNet18_baseline(num_classes):
     return ResNet_baseline(ResBlock, [2,2,2,2], num_classes)
 
-def ResNet18_offload(num_classes):
-    return ResNet_offload(ResBlock, [2,2,2,2], num_classes)
+def ResNet18(num_classes):
+    return ResNet(ResBlock, [2,2,2,2], num_classes)
