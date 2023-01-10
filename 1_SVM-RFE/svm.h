@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+#define _OPENMP
+// #define _MKL
+
 struct svm_node
 {
 	int index;

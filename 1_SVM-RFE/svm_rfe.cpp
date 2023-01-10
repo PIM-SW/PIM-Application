@@ -1406,6 +1406,7 @@ bool Svm_RFE::svm_rfe_engine(struct svm_problem prob,struct svm_parameter param,
 		}
 	}	
 	
+	cout << "                               " << endl;
 	cout << "SVM Training time: " << total << "s" << endl;
 
 	return true;

@@ -24,12 +24,6 @@ int nGeneLength;
 float **ppMatrix;
 #endif
 
-//const int GENES=15154;
-//const int CASES=253;
- 
-//const int GENES=2000;
-//const int CASES=62;
-
 #define ALIGN_BYTES		128
 
 char *alignMalloc( int len  )
@@ -49,6 +43,14 @@ int cmdline_parse(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
+	std::cout << std::endl;
+  	std::cout << "SVM-RFE: Gene Expression Classifier Run ..." << std::endl;
+  	std::cout << "O       o O       o O       o       o O       o O       o       o O       o O       o" << std::endl;
+  	std::cout << "| O   o | | O   o | | O   o | O   o | | O   o | | O   o | O   o | | O   o | | O   o |" << std::endl;
+  	std::cout << "| | O | | | | O | | | | O | | | O | | | | O | | | | O | | | O | | | | O | | | | O | |" << std::endl;
+  	std::cout << "| o   O | | o   O | | o   O | o   O | | o   O | | o   O | o   O | | o   O | | o   O |" << std::endl;
+  	std::cout << "o       O o       O o       O       O o       O o       O       O o       O o       O" << std::endl << std::endl;
+
 	int i, j;	
 	clock_t start0, end0;
 	float sum0;	
@@ -108,6 +110,22 @@ int main(int argc, char* argv[])
 		fprank << eliminateHistory.weightEl[j].ID << " \t" << eliminateHistory.weightEl[j].weight << "\n"; //output
 	}
 	fprank.close();
+
+	std::cout << "Results are stored in ./ranking.txt" << std::endl;
+
+	std::cout << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_SIMD-to-IR_APIM_ISSAC.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_SIMD-to-IR_APIM_PRIME.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_SIMD-to-IR_DPIM_Newton.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_SIMD-to-IR_DPIM_HBM-PIM.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_SIMD-to-IR_PNM_RecNMP.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_SIMD-to-IR_PNM_TensorDIMM.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_Func-to-IR_APIM_ISSAC.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_Func-to-IR_APIM_PRIME.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_Func-to-IR_DPIM_Newton.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_Func-to-IR_DPIM_HBM-PIM.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_Func-to-IR_PNM_RecNMP.trace" << std::endl;
+    std::cout << "#..Successfully generated IR trace: C_Func-to-IR_PNM_TensorDIMM.trace" << std::endl << std::endl;
 
 	return 0;
 }

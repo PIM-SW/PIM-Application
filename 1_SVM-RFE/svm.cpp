@@ -1,27 +1,19 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <float.h>
 #include <string.h>
 #include <stdarg.h>
-
+#include <math.h>
 #include "svm.h"
-
-#ifdef _MKL
-#include "mkl.h"
-#else
-#include <mkl.h>
-#endif
+#include "cblas.h"
+#include "pim_avail_op.h"
 
 #ifndef WIN32
 #include "wtime.h"
 #else
 #include <time.h>
 #endif
-
-
-//#define  _OPENMP
 
 typedef float Qfloat;
 typedef signed char schar;
@@ -666,33 +658,14 @@ void Solver::Solve(int l, const Kernel& Q, const float *b_, const schar *y_,
 		float delta_alpha_i = alpha[i] - old_alpha_i;
 		float delta_alpha_j = alpha[j] - old_alpha_j;
 
-		// [CHJ] PIM function should replace here.
-		cblas_saxpy(active_size, delta_alpha_i, Q_i, 1, G, 1 );
-		cblas_saxpy(active_size, delta_alpha_j, Q_j, 1, G, 1 );
-		
+		// [CHJ] PIM API replaces the below for loop
+		printf("cblas_saxpy offloaded to PIM...\r");
+		pimblas_saxpy(active_size, delta_alpha_i, Q_i, 1, G, 1 );
+		pimblas_saxpy(active_size, delta_alpha_j, Q_j, 1, G, 1 );
 		// for(int k=0;k<active_size;k++)
 		// {
 		// 	G[k] += Q_i[k]*delta_alpha_i + Q_j[k]*delta_alpha_j;
 		// }		
-
-		/*
-		for(int k=0;k<active_size;k++)
-		{
-			copy_G[k] += Q_i[k]*delta_alpha_i + Q_j[k]*delta_alpha_j;
-		}
-
-		for(int k=0;k<active_size;k++)
-		{
-			if(G[k]!=copy_G[k]){
-				printf("not same2!!\n");
-				printf("%f, %f %f\n",G[k],copy_G[k], copy1_G[k]);
-				printf("%f, %f\n",Q_i[k]*delta_alpha_i,Q_j[k]*delta_alpha_j);
-				printf("%f\n", eps);
-			}
-		}
-		*/
-
-		
 
 		// update alpha_status and G_bar
 
@@ -1210,15 +1183,18 @@ public:
 			// [CHJ] Method 1, calling Kernel::dot.
 			for(int j=start;j<len;j++)			
 				data[j] = (Qfloat)(y[i]*y[j]*(this->*kernel_function)(i,j));
+
 #else // _MKL
 			// Method 2, parallel version on CASES
 			
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif		
-			// [CHJ] replace cblas_sdot with PIM API.
+			// [CHJ] PIM API replaces the for loop below
 			for(int j=start;j<len;j++)			
-				data[j] = (Qfloat)(y[i]*y[j]* cblas_sdot (nGeneLength, ppMatrix[i], 1, ppMatrix[j], 1));
+				data[j] = (Qfloat)(y[i]*y[j]* pimblas_sdot (nGeneLength, ppMatrix[i], 1, ppMatrix[j], 1));			
+			// for(int j=start;j<len;j++)			
+			// 	data[j] = (Qfloat)(y[i]*y[j]* cblas_sdot (nGeneLength, ppMatrix[i], 1, ppMatrix[j], 1));
 
 #endif
 		}
