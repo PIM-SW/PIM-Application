@@ -1,3 +1,6 @@
+mkdir -p IR
+printf "\nRunning DLRM with PIM API...\n\n"
+
 # RMC2 (Source: DeepRecSys)
 #   Dense FC: 256-128-32
 #   Predict FC: 512-128-1
@@ -5,7 +8,22 @@
 #   Lookup: ~80
 #   Pooling: Sum
 # Experiment with $1=80, $2=10000
-printf "\nRunning DLRM...\n"
+
+# python3 dlrm_s_pytorch.py \
+#     --arch-sparse-feature-size=32 \
+#     --arch-mlp-bot="256-128-32" \
+#     --arch-mlp-top="512-128-1" \
+#     --loss-function=bce \
+#     --round-targets=True \
+#     --learning-rate=0.1 \
+#     --mini-batch-size=32 \
+#     --inference-only \
+#     --num-indices-per-lookup 80 \
+#     --data-size=10000 \
+#     --num-indices-per-lookup-fixed=false \
+#     --arch-embedding-size="1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000"
+
+# Smaller um-indices-per-lookup and data-size
 python3 dlrm_s_pytorch.py \
     --arch-sparse-feature-size=32 \
     --arch-mlp-bot="256-128-32" \
@@ -13,11 +31,10 @@ python3 dlrm_s_pytorch.py \
     --loss-function=bce \
     --round-targets=True \
     --learning-rate=0.1 \
-    --mini-batch-size=32 \
+    --mini-batch-size=16 \
     --inference-only \
-    --num-indices-per-lookup 80 \
-    --data-size=10000 \
+    --num-indices-per-lookup 10 \
+    --data-size=32 \
     --num-indices-per-lookup-fixed=false \
     --arch-embedding-size="1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000-1000000"
-
 

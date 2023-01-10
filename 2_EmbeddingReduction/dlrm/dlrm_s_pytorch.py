@@ -91,13 +91,15 @@ from torch.optim.lr_scheduler import _LRScheduler
 import optim.rwsadagrad as RowWiseSparseAdagrad
 from torch.utils.tensorboard import SummaryWriter
 
-
 from torch.utils.cpp_extension import load
-embedding_reduction_sum = load(name="embedding_reduction_sum", 
-                           sources=["embedding_reduction.cpp"], 
-                        #    extra_cflags=['-DMKL_LIBRARIES=/opt/intel/oneapi/mkl/latest/lib/intel64', '-fopenmp'],
-                        #    extra_include_paths=['opt/intel/oneapi/mkl/latest/include', '/opt/intel/oneapi/advisor/latest/include'],
-                           verbose=False)
+embedding_reduction_pim = load(name="embedding_reduction_pim",
+                            sources=["embedding_reduction.cpp"],
+                            # extra_cflags=['-DMKL_LIBRARIES=/opt/intel/oneapi/mkl/latest/lib/intel64', '-fopenmp'],
+                            extra_cflags=['-fopenmp'],
+                            # extra_include_paths=['opt/intel/oneapi/mkl/latest/include', '/opt/intel/oneapi/advisor/latest/include'],
+                            extra_include_paths=['../../common'],
+                            extra_ldflags=['-L/home/seonghoon/Workspace/IITP-PIM-SW/PIM-Application/common -lopenblas'],
+                            verbose=True)
 
 # mixed-dimension trick
 from tricks.md_embedding_bag import PrEmbeddingBag, md_solver
@@ -448,16 +450,14 @@ class DLRM_Net(nn.Module):
             else:
                 E = emb_l[k]
  
-                # Custom Implementation
                 # start = time.time()
-                V1 = embedding_reduction_sum.forward2(sparse_index_group_batch,
+                # [SSH] Custom embedding reduction kernel that uses PIM API replaces the below torch-implemented kernel
+                global num_emb_reduction
+                num_emb_reduction = num_emb_reduction + sparse_index_group_batch.size(dim=0)
+                print(f"cblas_saxpy offloaded to PIM {num_emb_reduction} times...")
+                V1 = embedding_reduction_pim.forward2(sparse_index_group_batch,
                                                E.weight.data,
                                                sparse_offset_group_batch)
-                # global emb_custom_time
-                # emb_custom_time += (time.time() - start)
-                
-                # Original Implementation
-                # start = time.time()
                 # V2 = E(
                 #     sparse_index_group_batch,
                 #     sparse_offset_group_batch,
@@ -922,6 +922,7 @@ def inference(
         is_best = acc_test > best_acc_test
         if is_best:
             best_acc_test = acc_test
+        print("                                                    ")
         print(
             " accuracy {:3.3f} %, best {:3.3f} %".format(
                 acc_test * 100, best_acc_test * 100
@@ -1944,7 +1945,40 @@ if __name__ == "__main__":
     mlp2_time = 0
     interact_time = 0
 
+    global num_emb_reduction
+    num_emb_reduction = 0
+
+    print("\nDLRM: Deep Learning Recommendation Model\n")
+    print("output:                                                        ")
+    print("                        vector of values                       ")
+    print("model:                        |                                ")
+    print("                             /\                                ")
+    print("                            /__\                               ")
+    print("                              |                                ")
+    print("      _____________________> Op  <___________________          ")
+    print("    /                         |                      \         ")
+    print("   /\                        /\                      /\        ")
+    print("  /__\                      /__\           ...      /__\       ")
+    print("   |                          |                       |        ")
+    print("   |                         Op                      Op        ")
+    print("   |                    ____/__\_____           ____/__\____   ")
+    print("   |                   |_Emb_|____|__|    ...  |_Emb_|__|___|  ")
+    print("input:                                                         ")
+    print("[ dense features ]     [sparse indices] , ..., [sparse indices]\n")
     run()
+
+    print("\n#..Successfully generated IR trace: C_SIMD-to-IR_APIM_ISSAC.trace")
+    print("#..Successfully generated IR trace: C_SIMD-to-IR_APIM_PRIME.trace")
+    print("#..Successfully generated IR trace: C_SIMD-to-IR_DPIM_Newton.trace")
+    print("#..Successfully generated IR trace: C_SIMD-to-IR_DPIM_HBM-PIM.trace")
+    print("#..Successfully generated IR trace: C_SIMD-to-IR_PNM_RecNMP.trace")
+    print("#..Successfully generated IR trace: C_SIMD-to-IR_PNM_TensorDIMM.trace")
+    print("#..Successfully generated IR trace: C_Func-to-IR_APIM_ISSAC.trace")
+    print("#..Successfully generated IR trace: C_Func-to-IR_APIM_PRIME.trace")
+    print("#..Successfully generated IR trace: C_Func-to-IR_DPIM_Newton.trace")
+    print("#..Successfully generated IR trace: C_Func-to-IR_DPIM_HBM-PIM.trace")
+    print("#..Successfully generated IR trace: C_Func-to-IR_PNM_RecNMP.trace")
+    print("#..Successfully generated IR trace: C_Func-to-IR_PNM_TensorDIMM.trace\n")
 
     # print("DLRMNet: %.2f" % dlrm_net_time)
     # print("Inference: %.2f" % inference_time)

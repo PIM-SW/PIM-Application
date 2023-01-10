@@ -18,6 +18,8 @@
 #include <iostream>
 #include <vector>
 #include <omp.h>
+#include "cblas.h"
+#include "pim_avail_op.h"
 // #include <mkl.h>
 // #include <advisor-annotate.h>
 
@@ -79,7 +81,7 @@ def forward(self, input: Tensor, offsets: Optional[Tensor] = None, per_sample_we
 */
 
 /* custom embedding reduction with per_sample_weights */
-torch::Tensor embedding_reduction_sum(
+torch::Tensor embedding_reduction_pim(
   torch::Tensor input, // 1D Tensor containing bags of indices
   torch::Tensor weight,// embedding matrix/table of (N, M)
   torch::Tensor offsets, // 1D Tensor of starting index position of each bag (sequence) in input
@@ -108,10 +110,12 @@ torch::Tensor embedding_reduction_sum(
   #pragma omp parallel for
   for (int i = 0; i < batch; i++) {
     for (int j = offsets_ptr[i]; j < (i == (batch-1) ? num_reduction : offsets_ptr[i+1]); j++) {
-      for (int k = 0; k < dim; k++) {
-        output_ptr[dim*i + k] += per_sample_weights_ptr[j] * weight_ptr[dim*input_ptr[j] + k];
-      }
-      // cblas_saxpy(dim, per_sample_weights_ptr[j], weight_ptr + dim*input_ptr[j], 1, output_ptr + dim*i, 1);
+
+      // [SSH] PIM API replaces the below for loop
+      pimblas_saxpy(dim, per_sample_weights_ptr[j], weight_ptr + dim*input_ptr[j], 1, output_ptr + dim*i, 1);
+      // for (int k = 0; k < dim; k++) {
+      //   output_ptr[dim*i + k] += per_sample_weights_ptr[j] * weight_ptr[dim*input_ptr[j] + k];
+      // }
     }
   }
 
@@ -119,7 +123,7 @@ torch::Tensor embedding_reduction_sum(
 }
 
 /* custom embedding reduction without per_sample_weights */
-torch::Tensor embedding_reduction_sum2(
+torch::Tensor embedding_reduction_pim2(
   torch::Tensor input, // 1D Tensor containing bags of indices
   torch::Tensor weight,// embedding matrix/table of (N, M)
   torch::Tensor offsets // 1D Tensor of starting index position of each bag (sequence) in input
@@ -148,11 +152,14 @@ torch::Tensor embedding_reduction_sum2(
   #pragma omp parallel for
   for (int i = 0; i < batch; i++) {
     for (int j = offsets_ptr[i]; j < (i == (batch-1) ? num_reduction : offsets_ptr[i+1]); j++) {
-      for (int k = 0; k < dim; k++) {
-        output_ptr[dim*i + k] += weight_ptr[dim*input_ptr[j] + k];
-      }
+
       // ANNOTATE_ITERATION_TASK(saxpy);
-      // cblas_saxpy(dim, 1, weight_ptr + dim*input_ptr[j], 1, output_ptr + dim*i, 1);
+ 
+      // [SSH] PIM API replaces the below for loop
+      pimblas_saxpy(dim, 1, weight_ptr + dim*input_ptr[j], 1, output_ptr + dim*i, 1);
+      // for (int k = 0; k < dim; k++) {
+      //   output_ptr[dim*i + k] += weight_ptr[dim*input_ptr[j] + k];
+      // }
     }
   }
   // ANNOTATE_SITE_BEGIN(reduction);
@@ -161,6 +168,6 @@ torch::Tensor embedding_reduction_sum2(
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-  m.def("forward", &embedding_reduction_sum, "custom embedding reduction with per_sample_weights");
-  m.def("forward2", &embedding_reduction_sum2, "custom embedding reduction without per_sample_weights");
+  m.def("forward", &embedding_reduction_pim, "embedding reduction with per_sample_weights");
+  m.def("forward2", &embedding_reduction_pim2, "embedding reduction without per_sample_weights");
 }
