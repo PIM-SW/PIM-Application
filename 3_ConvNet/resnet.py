@@ -2,7 +2,12 @@ import torch
 from torch import nn
 from torch.utils.cpp_extension import load
 
-conv2d_cuda = load(name="conv2d_cuda", sources=["conv2d.cpp", "conv2d_kernel.cu"])
+conv2d_cuda = load(name="conv2d_cuda",
+                    sources=["conv2d.cpp", "conv2d_kernel.cu"],
+                    extra_cflags=['-fopenmp'],
+                    extra_include_paths=['../common'],
+                    extra_ldflags=['-L/home/seonghoon/Workspace/IITP-PIM-SW/PIM-Application/common -lopenblas'],
+                    verbose=True)
 
 # Define ResBlock
 class ResBlock(nn.Module):

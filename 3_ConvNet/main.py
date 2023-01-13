@@ -13,7 +13,9 @@ import argparse
 from resnet import ResNet18
 
 # Select Compute Device
-train_on_gpu = torch.cuda.is_available()
+# [SSH] Temporarily commented out for CPU execution
+# train_on_gpu = torch.cuda.is_available()
+train_on_gpu = False
 device = "cuda" if train_on_gpu else "cpu"
 if train_on_gpu:
     print("CUDA is available. Running on GPU...")
@@ -48,7 +50,14 @@ train_data_size = (np.floor(len(training_dataset)*0.8)).astype(int)
 val_data_size = len(training_dataset) - train_data_size
 train_data, val_data = torch.utils.data.random_split(training_dataset, [train_data_size, val_data_size], generator=torch.Generator().manual_seed(123))
 ## Test
-test_data = datasets.CIFAR10(root='./dataset', train=False, download=True, transform=test_transformation)
+# test_data = datasets.CIFAR10(root='./dataset', train=False, download=True, transform=test_transformation)
+
+## [SSH] Used for inferencing only a certain portion of the test set
+test_dataset = datasets.CIFAR10(root='./dataset', train=False, download=True, transform=test_transformation)
+sample_pct = 0.005
+sample_data_size = (np.floor(len(test_dataset)*sample_pct)).astype(int)
+unused_data_size = len(test_dataset) - sample_data_size
+test_data, unused_data = torch.utils.data.random_split(test_dataset, [sample_data_size, unused_data_size], generator=torch.Generator().manual_seed(123))
 
 # DataLoader
 train_dataloader = DataLoader(dataset=train_data, batch_size=args.batch_size, shuffle=True)

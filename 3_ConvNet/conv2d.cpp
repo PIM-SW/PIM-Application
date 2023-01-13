@@ -18,8 +18,9 @@ torch::Tensor conv2d_forward(torch::Tensor input,
                             int stride) {
     
     // Check input tensors
-    CHECK_INPUT(input);
-    CHECK_INPUT(weight);
+    // [SSH] Temporarily commented out for CPU execution
+    // CHECK_INPUT(input);
+    // CHECK_INPUT(weight);
 
     // Call relaying function
     return conv2d_cuda_forward(input, weight, padding, stride);
