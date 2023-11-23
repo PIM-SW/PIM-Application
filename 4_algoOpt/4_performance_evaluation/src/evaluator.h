@@ -66,7 +66,8 @@ public:
             int max_load_pim = 0;
 
             for(size_t j=0; j<curqlen; j++) {
-                pim_cnt[query[i][j] / DEVICE_SIZE] += 1;
+                pim_cnt[query[i][j] / DEVICE_SIZE] += 1; // if (reduction_size < num_device)
+                // pim_cnt[query[i][j] % num_device] += 1; // if (reduction_size > num_device)
                 for(int l=0; l < EMBEDDING_DIM; l++) {
                     qres[i + myqbase][l] += embedding_table[query[i][j]][l];
                 }

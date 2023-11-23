@@ -26,7 +26,6 @@ using namespace std;
 using namespace std::chrono;
 
 #define EMBEDDING_DIM 64        // dimension of each embedding vector
-#define PARTITION_SIZE 128      // number of features in each partition
 #define DEVICE_SIZE 2048        // number of embedding vectors per memory device
 
 struct TInfo {

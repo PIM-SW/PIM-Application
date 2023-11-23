@@ -8,14 +8,12 @@ num_partitions=(32000 25360 14880 10992) # partition size = 32
 # Variables
 len=${#DATASET[@]}
 
-# Performance Evaluation
-cd ./4_performance_evaluation
+# Correlation-Aware Variable-Sized Clustering
+cd ./3_clustering
 mkdir -p bin
-make all
+make
 
 for (( i=0; i<$len; i++ )); do
-    printf "\nRunning baseline on dataset %s\n" ${DATASET[$i]}
-    ./bin/eval_baseline -d ${DATASET[$i]}
-    printf "\nRunning remapped on dataset %s\n" ${DATASET[$i]}
-    ./bin/eval_remapped -d ${DATASET[$i]} -p ${num_partitions[$i]}
+    printf "\nCreating remapped mapping on dataset %s\n" ${DATASET[$i]}
+    ./bin/clustering -d ${DATASET[$i]} -p ${num_partitions[$i]} --remap-only
 done

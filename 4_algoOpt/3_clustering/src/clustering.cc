@@ -18,7 +18,7 @@
 #include <filesystem>
 #include <algorithm>
 
-#define TARGET_MEMORY_RATIO {1.25, 1.5, 2, 9} // MUST be in increasing order
+#define TARGET_MEMORY_RATIO {1.25, 1.5, 2} // MUST be in increasing order
 #define TARGET_DIM    {64}
 #define INITIAL_MIN_RATIO 10000
 #define DECREMENT_THRESHOLD 0.001
@@ -29,10 +29,6 @@
 
 #ifndef PARTITION_SIZE
 #define PARTITION_SIZE 128
-#endif
-
-#ifndef COMPARE_RATIO
-#define COMPARE_RATIO 1.5
 #endif
 
 using namespace std;
@@ -181,7 +177,7 @@ public:
 
     void CorrelationAwareVariableSizedClustering(vector<pair<int, int> > &feature_to_pos, vector<vector<int> > &feature_id_per_partition, vector<vector<int> > &feature_cluster_per_partition, int num_train) {
         
-        for (auto dim : TARGET_DIM) {
+        for (auto dim : EMBEDDING_DIM_LIST) {
 
             vector<set<set<int>>> empty_cluster_per_partition(num_partition, set<set<int>>());
             vector<set<pair<set<int>, set<int>>>> global_merge_table; // global_merge_table[pid] = set of pair<set of features in merged cluster, set of queries that belong to merged cluster>
